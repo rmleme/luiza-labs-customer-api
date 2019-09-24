@@ -1,0 +1,14 @@
+<Context>
+	<Resource
+		name="jdbc/CustomerDB"
+		auth="Container"
+		type="javax.sql.DataSource"
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+		maxActive="100"
+		maxIdle="30"
+		maxWait="10000"
+		driverClassName="com.mysql.cj.jdbc.Driver"
+		url="jdbc:mysql://${database.host}:${database.port}/${database.name}"
+		username="${database.user}"
+		password="${database.password}" />
+</Context>

@@ -1,0 +1,29 @@
+version: '2.1'
+
+services:
+  luiza-labs-mysql:
+    image: mysql:5.7.22
+    environment:
+      - MYSQL_ROOT_PASSWORD=p4SSW0rd
+      - MYSQL_DATABASE=luizalabs-db
+      - MYSQL_USER=luizalabs-user
+      - MYSQL_PASSWORD=luizalabs
+    ports:
+      - 3306:3306
+    volumes:
+      - ~/dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  luiza-labs-customer-api:
+    image: luiza-labs-customer-api:1.0-SNAPSHOT
+    depends_on:
+      luiza-labs-mysql:
+        condition: service_healthy
+    build:
+      context: .
+    environment:
+      - "JAVA_OPTS=-Ddatabase.host=luiza-labs-mysql -Ddatabase.port=3306 -Ddatabase.user=luizalabs-user -Ddatabase.password=luizalabs -Ddatabase.name=luizalabs-db"
+    ports:
+      - 8080:8080
