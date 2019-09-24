@@ -2,7 +2,7 @@ package br.com.magazineluiza.api.product.model;
 
 import java.util.Objects;
 
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Product {
 

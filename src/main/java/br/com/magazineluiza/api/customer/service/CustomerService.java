@@ -35,7 +35,7 @@ public class CustomerService {
 		return customerDAO.retrieveAll();
 	}
 
-	public Customer retrieve(long id) {
+	public Customer retrieve(String id) {
 		return customerDAO.retrieve(id);
 	}
 
@@ -46,7 +46,7 @@ public class CustomerService {
 		return customerDAO.update(customer);
 	}
 
-	public int delete(long id) {
+	public int delete(String id) {
 		return customerDAO.delete(id);
 	}
 }

@@ -8,9 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 
 public class CustomerURLPathExtractor {
 
-	private static final Pattern REGEX_PATTERN_ID = Pattern.compile("/([0-9]+)");
+	private static final Pattern REGEX_PATTERN_ID = Pattern.compile("([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})");
 
-	private Integer id = null;
+	private String id;
 
 	public CustomerURLPathExtractor(HttpServletRequest request) throws ServletException {
 		if (request.getPathInfo() == null) {
@@ -19,14 +19,15 @@ public class CustomerURLPathExtractor {
 
 		Matcher matcher = REGEX_PATTERN_ID.matcher(request.getPathInfo());
 		if (matcher.find()) {
-			id = Integer.valueOf(matcher.group(1));
+			id = matcher.group(1);
 			return;
 		}
 
+		// TODO: trocar por um ValidationError
 		throw new ServletException("Invalid URI");
 	}
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 }

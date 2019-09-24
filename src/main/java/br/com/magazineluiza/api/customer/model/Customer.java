@@ -10,7 +10,7 @@ public class Customer {
 
 	public static final int MAX_EMAIL_SIZE = 100;
 
-	private long id;
+	private String id;
 
 	private String name;
 
@@ -18,11 +18,11 @@ public class Customer {
 
 	private Set<Product> favoriteProducts;
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
