@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -28,7 +29,7 @@ import br.com.magazineluiza.api.customer.model.Customer;
 import br.com.magazineluiza.api.customer.service.CustomerService;
 import br.com.magazineluiza.api.product.controller.ProductController;
 
-@WebServlet(urlPatterns = { "/customer/*" }, asyncSupported = false)
+@WebServlet(urlPatterns = { "/customer/*" }, asyncSupported = true)
 public class CustomerController extends HttpServlet {
 
 	private static final long serialVersionUID = 8654517234459083979L;
@@ -50,134 +51,207 @@ public class CustomerController extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		if (!APPLICATION_JSON.equals(request.getContentType())) {
-			response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-			return;
-		}
+		final AsyncContext context = request.startAsync();
+		context.start(new Runnable() {
+			public void run() {
+				HttpServletRequest httpRequest = (HttpServletRequest) context.getRequest();
+				HttpServletResponse httpResponse = (HttpServletResponse) context.getResponse();
 
-		String payload = IOUtils.toString(request.getReader());
-		if (payload == null || StringUtils.isBlank(payload)) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
+				try {
+					if (!APPLICATION_JSON.equals(httpRequest.getContentType())) {
+						httpResponse.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+						return;
+					}
 
-		URLPathExtractor pathExtractor = new URLPathExtractor(request);
+					String payload = IOUtils.toString(httpRequest.getReader());
+					if (payload == null || StringUtils.isBlank(payload)) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
 
-		if (pathExtractor.isFavoriteProductRequest()) {
-			request.setAttribute("payload", payload);
-			request.setAttribute("customerId", pathExtractor.getCustomerId());
-			productController.doPost(request, response);
-			return;
-		}
+					URLPathExtractor pathExtractor = new URLPathExtractor(httpRequest);
+					if (!pathExtractor.isValidRequest()) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
 
-		logger.debug("New customer: {}", payload);
+					if (pathExtractor.isFavoriteProductRequest()) {
+						httpRequest.setAttribute("payload", payload);
+						httpRequest.setAttribute("customerId", pathExtractor.getCustomerId());
+						productController.doPost(httpRequest, httpResponse);
+						return;
+					}
 
-		Customer customer = JSON.std.beanFrom(Customer.class, payload);
+					logger.debug("New customer: {}", payload);
 
-		Customer newCustomer = null;
-		try {
-			newCustomer = customerService.create(customer);
-		} catch (ValidationException e) {
-			logger.error("Could not create customer {}: validation failed with {}.", customer, e.getError());
-			ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
-			writeResponse(message, response, e.getError().getStatusCode());
-			return;
-		}
+					Customer customer = JSON.std.beanFrom(Customer.class, payload);
 
-		writeResponse(newCustomer, response, HttpServletResponse.SC_CREATED);
+					Customer newCustomer = null;
+					try {
+						newCustomer = customerService.create(customer);
+					} catch (ValidationException e) {
+						logger.error("Could not create customer {}: validation failed with {}.", customer,
+								e.getError());
+						ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
+						writeResponse(message, httpResponse, e.getError().getStatusCode());
+						return;
+					}
+
+					writeResponse(newCustomer, httpResponse, HttpServletResponse.SC_CREATED);
+				} catch (Exception e) {
+					logger.error(e);
+				} finally {
+					context.complete();
+				}
+			}
+		});
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		URLPathExtractor pathExtractor = new URLPathExtractor(request);
-		logger.debug("Customer id: {}", pathExtractor.getCustomerId());
+		final AsyncContext context = request.startAsync();
+		context.start(new Runnable() {
+			public void run() {
+				HttpServletRequest httpRequest = (HttpServletRequest) context.getRequest();
+				HttpServletResponse httpResponse = (HttpServletResponse) context.getResponse();
 
-		if (pathExtractor.getCustomerId() == null) {
-			List<Customer> customers = customerService.retrieveAll();
+				try {
+					URLPathExtractor pathExtractor = new URLPathExtractor(httpRequest);
+					if (!pathExtractor.isValidRequest()) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
+					logger.debug("Customer id: {}", pathExtractor.getCustomerId());
 
-			writeResponse(customers, response, HttpServletResponse.SC_OK);
-		} else {
-			Customer customer = customerService.retrieve(pathExtractor.getCustomerId());
+					if (pathExtractor.getCustomerId() == null) {
+						List<Customer> customers = customerService.retrieveAll();
 
-			if (customer == null) {
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				return;
+						writeResponse(customers, httpResponse, HttpServletResponse.SC_OK);
+					} else {
+						Customer customer = customerService.retrieve(pathExtractor.getCustomerId());
+
+						if (customer == null) {
+							httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+							return;
+						}
+
+						writeResponse(customer, httpResponse, HttpServletResponse.SC_OK);
+					}
+				} catch (Exception e) {
+					logger.error(e);
+				} finally {
+					context.complete();
+				}
 			}
-
-			writeResponse(customer, response, HttpServletResponse.SC_OK);
-		}
+		});
 	}
 
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		URLPathExtractor pathExtractor = new URLPathExtractor(request);
-		logger.debug("Customer id: {}", pathExtractor.getCustomerId());
+		final AsyncContext context = request.startAsync();
+		context.start(new Runnable() {
+			public void run() {
+				HttpServletRequest httpRequest = (HttpServletRequest) context.getRequest();
+				HttpServletResponse httpResponse = (HttpServletResponse) context.getResponse();
 
-		if (pathExtractor.getCustomerId() == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
+				try {
+					URLPathExtractor pathExtractor = new URLPathExtractor(httpRequest);
+					if (!pathExtractor.isValidRequest()) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
+					logger.debug("Customer id: {}", pathExtractor.getCustomerId());
 
-		if (!APPLICATION_JSON.equals(request.getContentType())) {
-			response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-			return;
-		}
+					if (pathExtractor.getCustomerId() == null) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
 
-		String payload = IOUtils.toString(request.getReader());
-		logger.debug("Customer: {}", payload);
+					if (!APPLICATION_JSON.equals(httpRequest.getContentType())) {
+						httpResponse.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+						return;
+					}
 
-		if (payload == null || StringUtils.isBlank(payload)) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
+					String payload = IOUtils.toString(httpRequest.getReader());
+					logger.debug("Customer: {}", payload);
 
-		Customer customer = JSON.std.beanFrom(Customer.class, payload);
-		customer.setId(pathExtractor.getCustomerId());
+					if (payload == null || StringUtils.isBlank(payload)) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
 
-		int numberOfUpdatedCustomers = 0;
-		try {
-			numberOfUpdatedCustomers = customerService.update(customer);
-		} catch (ValidationException e) {
-			logger.error("Could not update customer {}: validation failed with {}.", customer, e.getError());
-			ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
-			writeResponse(message, response, e.getError().getStatusCode());
-			return;
-		}
+					Customer customer = JSON.std.beanFrom(Customer.class, payload);
+					customer.setId(pathExtractor.getCustomerId());
 
-		if (numberOfUpdatedCustomers == 0) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
+					int numberOfUpdatedCustomers = 0;
+					try {
+						numberOfUpdatedCustomers = customerService.update(customer);
+					} catch (ValidationException e) {
+						logger.error("Could not update customer {}: validation failed with {}.", customer,
+								e.getError());
+						ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
+						writeResponse(message, httpResponse, e.getError().getStatusCode());
+						return;
+					}
 
-		writeResponse(customer, response, HttpServletResponse.SC_OK);
+					if (numberOfUpdatedCustomers == 0) {
+						httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+						return;
+					}
 
+					writeResponse(customer, httpResponse, HttpServletResponse.SC_OK);
+				} catch (Exception e) {
+					logger.error(e);
+				} finally {
+					context.complete();
+				}
+			}
+		});
 	}
 
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		URLPathExtractor pathExtractor = new URLPathExtractor(request);
+		final AsyncContext context = request.startAsync();
+		context.start(new Runnable() {
+			public void run() {
+				HttpServletRequest httpRequest = (HttpServletRequest) context.getRequest();
+				HttpServletResponse httpResponse = (HttpServletResponse) context.getResponse();
 
-		if (pathExtractor.isFavoriteProductRequest()) {
-			request.setAttribute("customerId", pathExtractor.getCustomerId());
-			request.setAttribute("productId", pathExtractor.getProductId());
-			productController.doDelete(request, response);
-			return;
-		}
+				try {
+					URLPathExtractor pathExtractor = new URLPathExtractor(httpRequest);
+					if (!pathExtractor.isValidRequest()) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
 
-		logger.debug("Customer id: {}", pathExtractor.getCustomerId());
+					if (pathExtractor.isFavoriteProductRequest()) {
+						httpRequest.setAttribute("customerId", pathExtractor.getCustomerId());
+						httpRequest.setAttribute("productId", pathExtractor.getProductId());
+						productController.doDelete(httpRequest, httpResponse);
+						return;
+					}
 
-		if (pathExtractor.getCustomerId() == null) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
+					logger.debug("Customer id: {}", pathExtractor.getCustomerId());
 
-		int numberOfDeletedCustomers = customerService.delete(pathExtractor.getCustomerId());
+					if (pathExtractor.getCustomerId() == null) {
+						httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						return;
+					}
 
-		if (numberOfDeletedCustomers == 0) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
+					int numberOfDeletedCustomers = customerService.delete(pathExtractor.getCustomerId());
 
-		response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+					if (numberOfDeletedCustomers == 0) {
+						httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+						return;
+					}
+
+					httpResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
+				} catch (Exception e) {
+					logger.error(e);
+				} finally {
+					context.complete();
+				}
+			}
+		});
 	}
 }

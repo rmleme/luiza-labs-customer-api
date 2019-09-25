@@ -21,8 +21,13 @@ public class URLPathExtractor {
 
 	private boolean isFavoriteProductRequest;
 
+	private boolean isValidRequest;
+
 	public URLPathExtractor(HttpServletRequest request) throws ServletException {
+		isValidRequest = false;
+
 		if (request.getPathInfo() == null) {
+			isValidRequest = true;
 			return;
 		}
 
@@ -31,10 +36,9 @@ public class URLPathExtractor {
 			customerId = matcher.group(1);
 			isFavoriteProductRequest = matcher.group(2) != null;
 			productId = matcher.group(4);
+			isValidRequest = true;
 			return;
 		}
-
-		throw new ServletException("Invalid URI.");
 	}
 
 	public String getCustomerId() {
@@ -47,5 +51,9 @@ public class URLPathExtractor {
 
 	public boolean isFavoriteProductRequest() {
 		return isFavoriteProductRequest;
+	}
+
+	public boolean isValidRequest() {
+		return isValidRequest;
 	}
 }
