@@ -6,17 +6,32 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Product {
 
+	private String id;
+
 	private Double price;
 
 	private String image;
 
 	private String brand;
 
-	private String id;
-
 	private String title;
 
 	private Double reviewScore;
+
+	public Product() {
+	}
+
+	public Product(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public Double getPrice() {
 		return price;
@@ -40,14 +55,6 @@ public class Product {
 
 	public void setBrand(String brand) {
 		this.brand = brand;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getTitle() {
@@ -88,7 +95,7 @@ public class Product {
 
 	@Override
 	public String toString() {
-		return "Product [price=" + price + ", image=" + image + ", brand=" + brand + ", id=" + id + ", title=" + title
+		return "Product [id=" + id + ", price=" + price + ", image=" + image + ", brand=" + brand + ", title=" + title
 				+ ", reviewScore=" + reviewScore + "]";
 	}
 }

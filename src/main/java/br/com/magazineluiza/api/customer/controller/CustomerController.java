@@ -1,7 +1,9 @@
 package br.com.magazineluiza.api.customer.controller;
 
+import static br.com.magazineluiza.api.core.controller.ControllerUtils.APPLICATION_JSON;
+import static br.com.magazineluiza.api.core.controller.ControllerUtils.writeResponse;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -24,7 +26,7 @@ import br.com.magazineluiza.api.core.model.ErrorMessage;
 import br.com.magazineluiza.api.core.validator.ValidationException;
 import br.com.magazineluiza.api.customer.model.Customer;
 import br.com.magazineluiza.api.customer.service.CustomerService;
-import br.com.magazineluiza.api.product.model.Product;
+import br.com.magazineluiza.api.product.controller.ProductController;
 
 @WebServlet(urlPatterns = { "/customer/*" }, asyncSupported = false)
 public class CustomerController extends HttpServlet {
@@ -32,16 +34,18 @@ public class CustomerController extends HttpServlet {
 	private static final long serialVersionUID = 8654517234459083979L;
 
 	private static final Logger logger = LogManager.getLogger();
-	private static final String APPLICATION_JSON = "application/json";
 
 	@Resource(name = "jdbc/CustomerDB")
 	private DataSource dataSource;
 
 	private CustomerService customerService;
 
+	private ProductController productController;
+
 	@Override
 	public void init() throws ServletException {
 		customerService = new CustomerService(dataSource);
+		productController = new ProductController(customerService);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -58,59 +62,42 @@ public class CustomerController extends HttpServlet {
 		}
 
 		URLPathExtractor pathExtractor = new URLPathExtractor(request);
+
 		if (pathExtractor.isFavoriteProductRequest()) {
-			logger.debug("New favorite product: {}", payload);
-
-			Customer customer = customerService.retrieve(pathExtractor.getId());
-
-			if (customer == null) {
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				return;
-			}
-
-			Product product = JSON.std.beanFrom(Product.class, payload);
-
-			Product newProduct = null;
-			try {
-				newProduct = customerService.addFavoriteProduct(customer, product);
-			} catch (ValidationException e) {
-				logger.error("Could not add product {}: validation failed with {}.", product, e.getError());
-				ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
-				writeResponse(message, response, e.getError().getStatusCode());
-				return;
-			}
-
-			writeResponse(newProduct, response, HttpServletResponse.SC_CREATED);
-		} else {
-			logger.debug("New customer: {}", payload);
-
-			Customer customer = JSON.std.beanFrom(Customer.class, payload);
-
-			Customer newCustomer = null;
-			try {
-				newCustomer = customerService.create(customer);
-			} catch (ValidationException e) {
-				logger.error("Could not create customer {}: validation failed with {}.", customer, e.getError());
-				ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
-				writeResponse(message, response, e.getError().getStatusCode());
-				return;
-			}
-
-			writeResponse(newCustomer, response, HttpServletResponse.SC_CREATED);
+			request.setAttribute("payload", payload);
+			request.setAttribute("customerId", pathExtractor.getCustomerId());
+			productController.doPost(request, response);
+			return;
 		}
+
+		logger.debug("New customer: {}", payload);
+
+		Customer customer = JSON.std.beanFrom(Customer.class, payload);
+
+		Customer newCustomer = null;
+		try {
+			newCustomer = customerService.create(customer);
+		} catch (ValidationException e) {
+			logger.error("Could not create customer {}: validation failed with {}.", customer, e.getError());
+			ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
+			writeResponse(message, response, e.getError().getStatusCode());
+			return;
+		}
+
+		writeResponse(newCustomer, response, HttpServletResponse.SC_CREATED);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		URLPathExtractor pathExtractor = new URLPathExtractor(request);
-		logger.debug("Customer id: {}", pathExtractor.getId());
+		logger.debug("Customer id: {}", pathExtractor.getCustomerId());
 
-		if (pathExtractor.getId() == null) {
+		if (pathExtractor.getCustomerId() == null) {
 			List<Customer> customers = customerService.retrieveAll();
 
 			writeResponse(customers, response, HttpServletResponse.SC_OK);
 		} else {
-			Customer customer = customerService.retrieve(pathExtractor.getId());
+			Customer customer = customerService.retrieve(pathExtractor.getCustomerId());
 
 			if (customer == null) {
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -124,9 +111,9 @@ public class CustomerController extends HttpServlet {
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		URLPathExtractor pathExtractor = new URLPathExtractor(request);
-		logger.debug("Customer id: {}", pathExtractor.getId());
+		logger.debug("Customer id: {}", pathExtractor.getCustomerId());
 
-		if (pathExtractor.getId() == null) {
+		if (pathExtractor.getCustomerId() == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
@@ -145,7 +132,7 @@ public class CustomerController extends HttpServlet {
 		}
 
 		Customer customer = JSON.std.beanFrom(Customer.class, payload);
-		customer.setId(pathExtractor.getId());
+		customer.setId(pathExtractor.getCustomerId());
 
 		int numberOfUpdatedCustomers = 0;
 		try {
@@ -169,14 +156,22 @@ public class CustomerController extends HttpServlet {
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		URLPathExtractor pathExtractor = new URLPathExtractor(request);
-		logger.debug("Customer id: {}", pathExtractor.getId());
 
-		if (pathExtractor.getId() == null) {
+		if (pathExtractor.isFavoriteProductRequest()) {
+			request.setAttribute("customerId", pathExtractor.getCustomerId());
+			request.setAttribute("productId", pathExtractor.getProductId());
+			productController.doDelete(request, response);
+			return;
+		}
+
+		logger.debug("Customer id: {}", pathExtractor.getCustomerId());
+
+		if (pathExtractor.getCustomerId() == null) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 
-		int numberOfDeletedCustomers = customerService.delete(pathExtractor.getId());
+		int numberOfDeletedCustomers = customerService.delete(pathExtractor.getCustomerId());
 
 		if (numberOfDeletedCustomers == 0) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -184,12 +179,5 @@ public class CustomerController extends HttpServlet {
 		}
 
 		response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-	}
-
-	private void writeResponse(Object value, HttpServletResponse response, int statusCode) throws IOException {
-		response.setContentType(APPLICATION_JSON);
-		response.setStatus(statusCode);
-		response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-		JSON.std.write(value, response.getOutputStream());
 	}
 }

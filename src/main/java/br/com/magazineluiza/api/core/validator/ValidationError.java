@@ -2,6 +2,7 @@ package br.com.magazineluiza.api.core.validator;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 import java.util.ResourceBundle;
@@ -16,7 +17,8 @@ public enum ValidationError {
 	CUSTOMER_NAME_INVALID_SIZE("customer.field.name.invalid.size", SC_BAD_REQUEST),
 	PRODUCT_ID_BLANK("product.field.id.blank", SC_BAD_REQUEST),
 	PRODUCT_NOT_FOUND("product.field.id.not.found", SC_NOT_FOUND),
-	PRODUCT_NOT_UNIQUE("product.field.id.not.unique", SC_CONFLICT);
+	PRODUCT_NOT_UNIQUE("product.field.id.not.unique", SC_CONFLICT),
+	PRODUCT_API_ERROR("product.api.internal.error", SC_INTERNAL_SERVER_ERROR);
 
 	private static final String RESOURCE_BUNDLE_NAME = "messages";
 

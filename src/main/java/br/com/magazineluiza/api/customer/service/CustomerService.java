@@ -1,5 +1,7 @@
 package br.com.magazineluiza.api.customer.service;
 
+import static br.com.magazineluiza.api.core.validator.ValidationError.PRODUCT_NOT_FOUND;
+
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -20,6 +22,8 @@ public class CustomerService {
 
 	private ProductDAO productDAO;
 
+	private ProductClient productClient;
+
 	private EmailValidator emailValidator;
 
 	private NameValidator nameValidator;
@@ -29,9 +33,10 @@ public class CustomerService {
 	public CustomerService(DataSource dataSource) {
 		this.customerDAO = new CustomerDAO(dataSource);
 		this.productDAO = new ProductDAO(dataSource);
+		this.productClient = new ProductClient();
 		this.emailValidator = new EmailValidator(this.customerDAO);
 		this.nameValidator = new NameValidator();
-		this.productValidator = new ProductValidator(new ProductClient());
+		this.productValidator = new ProductValidator();
 	}
 
 	public Customer create(Customer customer) throws ValidationException {
@@ -63,8 +68,17 @@ public class CustomerService {
 	public Product addFavoriteProduct(Customer customer, Product product) throws ValidationException {
 		productValidator.validate(product.getId());
 
-		customer.getFavoriteProducts().add(product);
-		productDAO.addFavoriteProduct(customer, product);
-		return product;
+		Product newProduct = productClient.retrieve(product.getId());
+		if (newProduct == null) {
+			throw new ValidationException(PRODUCT_NOT_FOUND);
+		}
+
+		customer.getFavoriteProducts().add(newProduct);
+		return productDAO.addFavoriteProduct(customer, newProduct);
+	}
+
+	public int removeFavoriteProduct(Customer customer, String productId) {
+		customer.getFavoriteProducts().remove(new Product(productId));
+		return productDAO.removeFavoriteProduct(customer, productId);
 	}
 }

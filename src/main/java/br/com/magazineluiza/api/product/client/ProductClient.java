@@ -1,5 +1,7 @@
 package br.com.magazineluiza.api.product.client;
 
+import static br.com.magazineluiza.api.core.validator.ValidationError.PRODUCT_API_ERROR;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
@@ -15,6 +17,11 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.jr.ob.JSON;
+
+import br.com.magazineluiza.api.core.validator.ValidationException;
+import br.com.magazineluiza.api.product.model.Product;
+
 public class ProductClient {
 
 	private static final Logger logger = LogManager.getLogger();
@@ -29,7 +36,7 @@ public class ProductClient {
 		this.applicationProperties = ResourceBundle.getBundle(RESOURCE_BUNDLE_NAME);
 	}
 
-	public boolean exists(String id) {
+	public Product retrieve(String id) throws ValidationException {
 		try (CloseableHttpClient httpclient = HttpClients.createDefault();) {
 			String url = applicationProperties.getString(URL_KEY) + "/" + PRODUCT_RESOURCE + "/" + id;
 			HttpGet httpGet = new HttpGet(url);
@@ -48,17 +55,17 @@ public class ProductClient {
 			try {
 				String payload = httpclient.execute(httpGet, responseHandler);
 				logger.debug("Response: {}", payload);
-				return true;
+				return JSON.std.beanFrom(Product.class, payload);
 			} catch (ClientProtocolException e) {
 				if (String.valueOf(HttpStatus.SC_NOT_FOUND).equals(e.getMessage())) {
-					return false;
+					return null;
 				} else {
 					logger.error(e);
 					throw e;
 				}
 			}
 		} catch (IOException e) {
-			return false;
+			throw new ValidationException(PRODUCT_API_ERROR);
 		}
 	}
 }

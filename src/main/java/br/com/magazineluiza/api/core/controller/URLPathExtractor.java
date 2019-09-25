@@ -8,13 +8,16 @@ import javax.servlet.http.HttpServletRequest;
 
 public class URLPathExtractor {
 
+	private static final String UUID_PATTERN = "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}";
+
 	private static final String FAVORITE_PRODUCT_RESOURCE = "favoriteproduct";
 
 	private static final Pattern REGEX_PATTERN_ID = Pattern
-			.compile("^\\/([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})(\\/"
-					+ FAVORITE_PRODUCT_RESOURCE + ")*$");
+			.compile("^\\/(" + UUID_PATTERN + ")(\\/" + FAVORITE_PRODUCT_RESOURCE + ")*(\\/(" + UUID_PATTERN + "))*$");
 
 	private String customerId;
+
+	private String productId;
 
 	private boolean isFavoriteProductRequest;
 
@@ -27,15 +30,19 @@ public class URLPathExtractor {
 		if (matcher.find()) {
 			customerId = matcher.group(1);
 			isFavoriteProductRequest = matcher.group(2) != null;
+			productId = matcher.group(4);
 			return;
 		}
 
-		// TODO: trocar por um ValidationError
-		throw new ServletException("Invalid URI");
+		throw new ServletException("Invalid URI.");
 	}
 
-	public String getId() {
+	public String getCustomerId() {
 		return customerId;
+	}
+
+	public String getProductId() {
+		return productId;
 	}
 
 	public boolean isFavoriteProductRequest() {
