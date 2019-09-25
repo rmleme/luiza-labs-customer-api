@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3ffc4177-6be9-4f2f-8d21-d7a1218e197a",
+		"_postman_id": "db8ffc6f-0593-4e6d-92ca-eee113fbe357",
 		"name": "luiza-labs-customer-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -9,11 +9,13 @@
 			"name": "Retrieve All Customers",
 			"request": {
 				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "http://localhost:8080/customer-api/customer",
 					"protocol": "http",
@@ -33,11 +35,13 @@
 			"name": "Retrieve Customer",
 			"request": {
 				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "http://localhost:8080/customer-api/customer/b38346b4-8eac-4210-95fc-d0165e9e67db",
 					"protocol": "http",
@@ -63,6 +67,11 @@
 						"key": "Content-Type",
 						"name": "Content-Type",
 						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
 						"type": "text"
 					}
 				],
@@ -95,6 +104,11 @@
 						"name": "Content-Type",
 						"value": "application/json",
 						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
+						"type": "text"
 					}
 				],
 				"body": {
@@ -121,7 +135,13 @@
 			"name": "Delete Customer",
 			"request": {
 				"method": "DELETE",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": ""
@@ -152,6 +172,11 @@
 						"name": "Content-Type",
 						"type": "text",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
+						"type": "text"
 					}
 				],
 				"body": {
@@ -179,7 +204,13 @@
 			"name": "Remove Favorite Product",
 			"request": {
 				"method": "DELETE",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46MTIz",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": ""

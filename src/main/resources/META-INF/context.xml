@@ -11,4 +11,27 @@
 		url="jdbc:mysql://${database.host}:${database.port}/${database.name}"
 		username="${database.user}"
 		password="${database.password}" />
+
+	<Resource
+		name="jdbc/AuthDB"
+		auth="Container"
+		type="javax.sql.DataSource"
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+		maxActive="100"
+		maxIdle="30"
+		maxWait="10000"
+		driverClassName="com.mysql.cj.jdbc.Driver"
+		url="jdbc:mysql://${database.host}:${database.port}/${database.name}"
+		username="${database.user}"
+		password="${database.password}" />
+
+	<Realm
+		className="org.apache.catalina.realm.DataSourceRealm"
+		dataSourceName="jdbc/AuthDB"
+		localDataSource="true"
+		userTable="user"
+		userNameCol="username"
+		userCredCol="password"
+		userRoleTable="user_role"
+		roleNameCol="role" />
 </Context>

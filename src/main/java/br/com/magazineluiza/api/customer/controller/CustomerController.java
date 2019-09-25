@@ -9,6 +9,9 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.HttpMethodConstraint;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +33,10 @@ import br.com.magazineluiza.api.customer.service.CustomerService;
 import br.com.magazineluiza.api.product.controller.ProductController;
 
 @WebServlet(urlPatterns = { "/customer/*" }, asyncSupported = true)
+@ServletSecurity(value = @HttpConstraint(rolesAllowed = { "CUSTOMER_READ_ROLE" }), httpMethodConstraints = {
+        @HttpMethodConstraint(value = "POST", rolesAllowed = "CUSTOMER_PERSIST_ROLE"),
+        @HttpMethodConstraint(value = "PUT", rolesAllowed = "CUSTOMER_PERSIST_ROLE"),
+        @HttpMethodConstraint(value = "DELETE", rolesAllowed = "CUSTOMER_PERSIST_ROLE"), })
 public class CustomerController extends HttpServlet {
 
 	private static final long serialVersionUID = 8654517234459083979L;

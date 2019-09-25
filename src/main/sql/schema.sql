@@ -23,3 +23,29 @@ CREATE TABLE product (
   CONSTRAINT customer_fk FOREIGN KEY (customer_id) REFERENCES customer (customer_id) ON DELETE CASCADE,
   CONSTRAINT product_customer_unique UNIQUE (id, customer_id)
 );
+
+
+
+CREATE TABLE user (
+  username VARCHAR(16) NOT NULL,
+  password VARCHAR(16) NOT NULL,
+  PRIMARY KEY (username)
+);
+
+CREATE TABLE user_role (
+  username VARCHAR(16) NOT NULL,
+  role VARCHAR(32) NOT NULL,
+  PRIMARY KEY (username, role),
+  CONSTRAINT user_fk FOREIGN KEY (username) REFERENCES user (username)
+);
+
+
+
+INSERT INTO user (username, password) values ('admin', '123');
+INSERT INTO user_role (username, role) values ('admin', 'CUSTOMER_READ_ROLE');
+INSERT INTO user_role (username, role) values ('admin', 'CUSTOMER_PERSIST_ROLE');
+
+INSERT INTO user (username, password) values ('readonly', '123');
+INSERT INTO user_role (username, role) values ('readonly', 'CUSTOMER_READ_ROLE');
+
+COMMIT;

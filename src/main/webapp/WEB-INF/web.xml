@@ -9,4 +9,15 @@
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+
+	<security-role>
+		<role-name>CUSTOMER_PERSIST_ROLE</role-name>
+	</security-role>
+	<security-role>
+		<role-name>CUSTOMER_READ_ROLE</role-name>
+	</security-role>
 </web-app>
