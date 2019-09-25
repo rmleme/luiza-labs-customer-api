@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Product {
 
-	private double price;
+	private Double price;
 
 	private String image;
 
@@ -18,11 +18,11 @@ public class Product {
 
 	private Double reviewScore;
 
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(Double price) {
 		this.price = price;
 	}
 

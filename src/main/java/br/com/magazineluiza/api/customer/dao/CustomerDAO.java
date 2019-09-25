@@ -4,18 +4,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import br.com.magazineluiza.api.core.dao.UUIDConverter;
 import br.com.magazineluiza.api.customer.model.Customer;
+import br.com.magazineluiza.api.product.dao.ProductDAO;
 
 public class CustomerDAO {
 
@@ -23,10 +23,13 @@ public class CustomerDAO {
 
 	private DataSource dataSource;
 
+	private ProductDAO productDAO;
+
 	private CustomerMapper customerMapper;
 
 	public CustomerDAO(DataSource dataSource) {
 		this.dataSource = dataSource;
+		this.productDAO = new ProductDAO(this.dataSource);
 		this.customerMapper = new CustomerMapper();
 	}
 
@@ -34,9 +37,8 @@ public class CustomerDAO {
 		String sql = "INSERT INTO customer (id, name, email) VALUES (?, ?, ?)";
 		String id = UUID.randomUUID().toString();
 
-		try (Connection conn = dataSource.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
-			ps.setBytes(1, convertUUIDToBinary(id));
+		try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
+			ps.setBytes(1, UUIDConverter.convertUUIDToBinary(id));
 			ps.setString(2, customer.getName());
 			ps.setString(3, customer.getEmail());
 			ps.executeUpdate();
@@ -56,7 +58,9 @@ public class CustomerDAO {
 				PreparedStatement ps = conn.prepareStatement(sql);
 				ResultSet rs = ps.executeQuery();) {
 			while (rs.next()) {
-				customers.add(customerMapper.toCustomer(rs));
+				Customer customer = customerMapper.toCustomer(rs);
+				customer.setFavoriteProducts(productDAO.retrieveByCustomer(customer));
+				customers.add(customer);
 			}
 		} catch (SQLException e) {
 			logger.error("Could not retrieve customers.", e);
@@ -70,10 +74,11 @@ public class CustomerDAO {
 		Customer customer = null;
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
-			ps.setBytes(1, convertUUIDToBinary(id));
+			ps.setBytes(1, UUIDConverter.convertUUIDToBinary(id));
 			try (ResultSet rs = ps.executeQuery();) {
 				if (rs.next()) {
 					customer = customerMapper.toCustomer(rs);
+					customer.setFavoriteProducts(productDAO.retrieveByCustomer(customer));
 				}
 			}
 		} catch (SQLException e) {
@@ -90,7 +95,7 @@ public class CustomerDAO {
 		try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
 			ps.setString(1, customer.getName());
 			ps.setString(2, customer.getEmail());
-			ps.setBytes(3, convertUUIDToBinary(customer.getId()));
+			ps.setBytes(3, UUIDConverter.convertUUIDToBinary(customer.getId()));
 			rowCount = ps.executeUpdate();
 			if (rowCount != 1) {
 				logger.warn("Customer not updated.");
@@ -107,7 +112,7 @@ public class CustomerDAO {
 		int rowCount = 0;
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
-			ps.setBytes(1, convertUUIDToBinary(id));
+			ps.setBytes(1, UUIDConverter.convertUUIDToBinary(id));
 			rowCount = ps.executeUpdate();
 			if (rowCount != 1) {
 				logger.warn("Customer not deleted.");
@@ -135,9 +140,5 @@ public class CustomerDAO {
 		}
 
 		return existsCustomer;
-	}
-
-	private byte[] convertUUIDToBinary(String uuidValue) {
-		return DatatypeConverter.parseHexBinary(uuidValue.replace("-", ""));
 	}
 }

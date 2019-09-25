@@ -1,4 +1,4 @@
-package br.com.magazineluiza.api.product;
+package br.com.magazineluiza.api.product.client;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

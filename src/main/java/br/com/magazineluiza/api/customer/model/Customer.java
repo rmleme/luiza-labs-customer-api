@@ -1,5 +1,6 @@
 package br.com.magazineluiza.api.customer.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import br.com.magazineluiza.api.product.model.Product;
@@ -16,7 +17,7 @@ public class Customer {
 
 	private String email;
 
-	private Set<Product> favoriteProducts;
+	private Set<Product> favoriteProducts = new HashSet<>();
 
 	public String getId() {
 		return id;

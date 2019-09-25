@@ -19,10 +19,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.jr.ob.JSON;
 
+import br.com.magazineluiza.api.core.controller.URLPathExtractor;
+import br.com.magazineluiza.api.core.model.ErrorMessage;
+import br.com.magazineluiza.api.core.validator.ValidationException;
 import br.com.magazineluiza.api.customer.model.Customer;
-import br.com.magazineluiza.api.customer.model.ErrorMessage;
 import br.com.magazineluiza.api.customer.service.CustomerService;
-import br.com.magazineluiza.api.customer.validator.ValidationException;
+import br.com.magazineluiza.api.product.model.Product;
 
 @WebServlet(urlPatterns = { "/customer/*" }, asyncSupported = false)
 public class CustomerController extends HttpServlet {
@@ -50,30 +52,57 @@ public class CustomerController extends HttpServlet {
 		}
 
 		String payload = IOUtils.toString(request.getReader());
-		logger.debug("Customer: {}", payload);
 		if (payload == null || StringUtils.isBlank(payload)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 
-		Customer customer = JSON.std.beanFrom(Customer.class, payload);
+		URLPathExtractor pathExtractor = new URLPathExtractor(request);
+		if (pathExtractor.isFavoriteProductRequest()) {
+			logger.debug("New favorite product: {}", payload);
 
-		Customer newCustomer = null;
-		try {
-			newCustomer = customerService.create(customer);
-		} catch (ValidationException e) {
-			logger.error("Could not create customer {}: validation failed with {}.", customer, e.getError());
-			ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
-			writeResponse(message, response, e.getError().getStatusCode());
-			return;
+			Customer customer = customerService.retrieve(pathExtractor.getId());
+
+			if (customer == null) {
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+
+			Product product = JSON.std.beanFrom(Product.class, payload);
+
+			Product newProduct = null;
+			try {
+				newProduct = customerService.addFavoriteProduct(customer, product);
+			} catch (ValidationException e) {
+				logger.error("Could not add product {}: validation failed with {}.", product, e.getError());
+				ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
+				writeResponse(message, response, e.getError().getStatusCode());
+				return;
+			}
+
+			writeResponse(newProduct, response, HttpServletResponse.SC_CREATED);
+		} else {
+			logger.debug("New customer: {}", payload);
+
+			Customer customer = JSON.std.beanFrom(Customer.class, payload);
+
+			Customer newCustomer = null;
+			try {
+				newCustomer = customerService.create(customer);
+			} catch (ValidationException e) {
+				logger.error("Could not create customer {}: validation failed with {}.", customer, e.getError());
+				ErrorMessage message = new ErrorMessage(e.getError().getErrorMessage());
+				writeResponse(message, response, e.getError().getStatusCode());
+				return;
+			}
+
+			writeResponse(newCustomer, response, HttpServletResponse.SC_CREATED);
 		}
-
-		writeResponse(newCustomer, response, HttpServletResponse.SC_CREATED);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		CustomerURLPathExtractor pathExtractor = new CustomerURLPathExtractor(request);
+		URLPathExtractor pathExtractor = new URLPathExtractor(request);
 		logger.debug("Customer id: {}", pathExtractor.getId());
 
 		if (pathExtractor.getId() == null) {
@@ -94,7 +123,7 @@ public class CustomerController extends HttpServlet {
 
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		CustomerURLPathExtractor pathExtractor = new CustomerURLPathExtractor(request);
+		URLPathExtractor pathExtractor = new URLPathExtractor(request);
 		logger.debug("Customer id: {}", pathExtractor.getId());
 
 		if (pathExtractor.getId() == null) {
@@ -139,7 +168,7 @@ public class CustomerController extends HttpServlet {
 
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		CustomerURLPathExtractor pathExtractor = new CustomerURLPathExtractor(request);
+		URLPathExtractor pathExtractor = new URLPathExtractor(request);
 		logger.debug("Customer id: {}", pathExtractor.getId());
 
 		if (pathExtractor.getId() == null) {

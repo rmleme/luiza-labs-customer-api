@@ -1,4 +1,4 @@
-package br.com.magazineluiza.api.customer.model;
+package br.com.magazineluiza.api.core.model;
 
 public class ErrorMessage {
 

@@ -1,4 +1,4 @@
-package br.com.magazineluiza.api.customer.validator;
+package br.com.magazineluiza.api.core.validator;
 
 public class ValidationException extends Exception {
 
