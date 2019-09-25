@@ -14,4 +14,4 @@
 ```bash
 curl http://localhost:8080/customer-api/customer
 ```
-8. Postman samples can be found at `src/main/docs/luiza-labs-customer-api.postman_collection.json`.
+8. Postman samples can be found at `src/main/docs/luiza-labs-customer-api.postman_collection.json`. Each request sample has a predefined Basic Authorization header already set, according to two valid API users (`admin` and `readonly`).
