@@ -1,0 +1,228 @@
+{
+	"info": {
+		"_postman_id": "3ffc4177-6be9-4f2f-8d21-d7a1218e197a",
+		"name": "luiza-labs-customer-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Retrieve All Customers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve Customer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer/b38346b4-8eac-4210-95fc-d0165e9e67db",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer",
+						"b38346b4-8eac-4210-95fc-d0165e9e67db"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Customer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"rodrigo.leme@luizalabs.com\",\n    \"name\": \"Rodrigo Leme\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Customer",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"rodrigo.m.leme@luizalabs.com\",\n    \"name\": \"Rodrigo M. Leme\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer/b38346b4-8eac-4210-95fc-d0165e9e67db",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer",
+						"b38346b4-8eac-4210-95fc-d0165e9e67db"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Customer",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer/b38346b4-8eac-4210-95fc-d0165e9e67db",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer",
+						"b38346b4-8eac-4210-95fc-d0165e9e67db"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Favorite Product",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": \"85a09a9e-d1f2-1221-fecb-a850cc4a3a72\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer/b38346b4-8eac-4210-95fc-d0165e9e67db/favoriteproduct",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer",
+						"b38346b4-8eac-4210-95fc-d0165e9e67db",
+						"favoriteproduct"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Favorite Product",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/customer-api/customer/b38346b4-8eac-4210-95fc-d0165e9e67db/favoriteproduct/85a09a9e-d1f2-1221-fecb-a850cc4a3a72",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"customer-api",
+						"customer",
+						"b38346b4-8eac-4210-95fc-d0165e9e67db",
+						"favoriteproduct",
+						"85a09a9e-d1f2-1221-fecb-a850cc4a3a72"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "8b2d8383-99e5-4bae-8c18-dbbbe7671271",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "1c433c29-6021-47a9-a1d9-40886237ad63",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

@@ -14,3 +14,4 @@
 ```bash
 curl http://localhost:8080/customer-api/customer
 ```
+8. Postman samples can be found at `src/main/docs/luiza-labs-customer-api.postman_collection.json`.
