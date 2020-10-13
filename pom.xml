@@ -21,7 +21,7 @@
 		<httpclient.version>4.5.10</httpclient.version>
 		<mysql.version>8.0.17</mysql.version>
 
-		<junit.version>4.12</junit.version>
+		<junit.version>4.13.1</junit.version>
 
 		<jetty.maven.version>9.4.20.v20190813</jetty.maven.version>
 		<maven.surefire.version>2.22.2</maven.surefire.version>
