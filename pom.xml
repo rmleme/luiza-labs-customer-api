@@ -15,7 +15,7 @@
 		<servlet.version>4.0.1</servlet.version>
 		<log4j.version>2.12.1</log4j.version>
 		<jackson.version>2.9.9</jackson.version>
-		<commons.io.version>2.6</commons.io.version>
+		<commons.io.version>2.7</commons.io.version>
 		<commons.lang.version>3.9</commons.lang.version>
 		<commons.validator.version>1.6</commons.validator.version>
 		<httpclient.version>4.5.10</httpclient.version>
