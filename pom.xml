@@ -18,7 +18,7 @@
 		<commons.io.version>2.6</commons.io.version>
 		<commons.lang.version>3.9</commons.lang.version>
 		<commons.validator.version>1.6</commons.validator.version>
-		<httpclient.version>4.5.10</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 		<mysql.version>8.0.17</mysql.version>
 
 		<junit.version>4.12</junit.version>
